@@ -16,7 +16,7 @@ Imports: digest (>= 0.6.0), Rcpp (>= 1.0.8)
 LinkingTo: Rcpp, RcppEigen
 SystemRequirement: C++11
 NeedsCompilation: yes
-License: GPL-3
+License: GPL (>= 3)
 Encoding: UTF-8
 RoxygenNote: 7.2.1
 Roxygen: list(markdown = TRUE)
