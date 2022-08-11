@@ -1,4 +1,4 @@
-AC_INIT(mmpca, 1.0)
+AC_INIT([mmpca],[2.0.2])
 AC_LANG(C++)
 AC_PROG_CXX
 
@@ -54,4 +54,5 @@ CXXFLAGS="${CXXFLAGS_backup}"
 dnl Now substitute these variables in src/Makevars.in to create src/Makevars
 AC_SUBST(GSL_CFLAGS)
 AC_SUBST(GSL_LIBS)
-AC_OUTPUT(src/Makevars)
+AC_CONFIG_FILES([src/Makevars])
+AC_OUTPUT
