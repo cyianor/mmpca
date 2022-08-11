@@ -155,22 +155,22 @@ init_inv_v <- function(V) {
   }
   if (ncol(V) < nrow(V)) {
     Vorth <- orth.compl(V)
-    xi <- c_invVinner(V, Vorth)[, 1:ncol(V), drop=FALSE]
+    xi <- c_invVinner(cbind(V, Vorth))[, seq_len(ncol(V)), drop=FALSE]
     s <- sign(V[1, 1])
     if (s == 0) {
       return(xi)
     }
-    shat <- sign(ref_Vxi(xi)[1, 1])
+    shat <- sign(c_Vxi(xi)[1, 1])
     if (shat == 0 || s == shat) {
       return(xi)
     }
     Vorth[, ncol(Vorth)] <- -Vorth[, ncol(Vorth)]
-    xi <- c_invVinner(V, Vorth)[, 1:ncol(V), drop=FALSE]
+    xi <- c_invVinner(cbind(V, Vorth))[, seq_len(ncol(V)), drop=FALSE]
     return(xi)
   } else if (ncol(V) > nrow(V)) {
-    xi <- c_invVinner(V[, 1:nrow(V)], matrix(NA, nrow(V), 0))
-    return(cbind(xi, matrix(0, nrow(xi), ncol(V)-nrow(V))))
+    xi <- c_invVinner(V[, seq_len(nrow(V))])
+    return(cbind(xi, matrix(0, nrow(xi), ncol(V) - nrow(V))))
   } else {
-    return(c_invVinner(V, matrix(NA, nrow(V), 0)))
+    return(c_invVinner(V))
   }
 }

@@ -1,6 +1,6 @@
-source('R/init.R')
-source('R/ref.R')
-source('R/c.R')
+# source('R/init.R')
+# source('R/ref.R')
+# source('R/c.R')
 
 # x list of data blocks
 # k rank of approximation
@@ -276,7 +276,7 @@ mmpca <- function(x, inds, k, lambda=NULL, trace=0, init_theta=NULL,
 
   # order components by total importance and calculate xhat
   ix <- order(-component_importances$total)
-  V <- lapply(xiD$xi, function(xi) ref_Vxi(xi)[, ix, drop=FALSE])
+  V <- lapply(xiD$xi, function(xi) c_Vxi(xi)[, ix, drop=FALSE])
   # set exact zeros in V
   for (i in 1:n) V[[i]][abs(V[[i]]) < 1e-5] <- 0
   xiD$D <- xiD$D[ix, ]
@@ -407,7 +407,7 @@ mmpca_lambda1 <- function(x, inds, k, lambda, nparallel, init=FALSE,
     if (i == 1) { # reorder components according to importances
       ix <- order(component_importances$total, decreasing=TRUE)
       for (j in 1:length(xiD$xi)) {
-        V <- ref_Vxi(xiD$xi[[j]])
+        V <- c_Vxi(xiD$xi[[j]])
         xiD$xi[[j]] <- init_inv_v(V[, ix])
       }
       xiD$D <- xiD$D[ix, ]
@@ -422,9 +422,9 @@ mmpca_lambda1 <- function(x, inds, k, lambda, nparallel, init=FALSE,
       msg(' msg: ', res[[6]], '\n')
     }
 
-    V <- lapply(xiD$xi, function(xi) ref_Vxi(xi))
+    V <- lapply(xiD$xi, function(xi) c_Vxi(xi))
     xhat <- list()
-    for (j in 1:length(x)) {
+    for (j in seq_along(x)) {
       row <- inds[j, 1]
       col <- inds[j, 2]
       xhat[[j]] <- V[[row]] %*% diag(xiD$D[, row] * xiD$D[, col]) %*%
