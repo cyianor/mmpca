@@ -1,3 +1,5 @@
 .vscode
 config.log
 config.status
+*.tar.gz
+*.Rcheck

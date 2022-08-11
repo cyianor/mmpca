@@ -1,2 +1,3 @@
 ^\.clang-format$
 ^LICENSE\.md$
+^.vscode$
