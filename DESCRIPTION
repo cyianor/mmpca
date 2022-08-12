@@ -13,7 +13,7 @@ Description: A generalization of principal component analysis for integrative
   <arXiv:1911.04927>.
 Depends: R (>= 3.3.0)
 Imports: digest (>= 0.6.0), Rcpp (>= 1.0.8)
-LinkingTo: Rcpp, RcppEigen
+LinkingTo: Rcpp, RcppEigen, RcppGSL
 SystemRequirement: C++11
 NeedsCompilation: yes
 License: GPL (>= 3)
