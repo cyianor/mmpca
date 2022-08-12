@@ -95,15 +95,8 @@ void gsl_fd_obj(const gsl_vector* theta, void* params, double* f, gsl_vector* gr
 }
 
 int prep_indices_len(const int k, const Eigen::VectorXi& p) {
-  int indices_len = 0;
-  for (Eigen::Index view = 0, n = p.size(); view < n; view++) {
-    for (int j = 0; j < k && j < p[view] - 1; j++) {
-      for (int i = j + 1; i < p[view]; i++) {
-        indices_len++;
-      }
-    }
-  }
-  return indices_len;
+  const Eigen::ArrayXi m = (p.array() - 1).min(k);
+  return (m * p.array() - m * (m - 1) / 2 - m).sum();
 }
 
 Eigen::MatrixXi prep_indices(const int indices_len, const int k,
@@ -169,16 +162,17 @@ void optim(double* theta, const double* start, size_t len,
 
 template <typename T>
 std::vector<T> list_to_vec(Rcpp::List list) {
-	std::vector<T> vec;
-	vec.reserve(list.length());
-	std::transform(list.begin(), list.end(), std::back_inserter(vec), Rcpp::as<T>);
+  std::vector<T> vec;
+  vec.reserve(list.length());
+  std::transform(list.begin(), list.end(), std::back_inserter(vec), Rcpp::as<T>);
 
-	return vec;
+  return vec;
 }
 
 // [[Rcpp::export]]
 double c_objective(Eigen::Map<Eigen::MatrixXd> theta, Rcpp::List x, Rcpp::List masks,
-             Eigen::MatrixXi inds, int k, Eigen::VectorXi p, Eigen::VectorXd lambda) {
+                   Eigen::MatrixXi inds, int k, Eigen::VectorXi p,
+                   Eigen::VectorXd lambda) {
   if (lambda.size() < 4) {
     const auto i = lambda.size();
     lambda.resize(4);
@@ -187,12 +181,15 @@ double c_objective(Eigen::Map<Eigen::MatrixXd> theta, Rcpp::List x, Rcpp::List m
     }
   }
 
-  std::vector<Eigen::Map<Eigen::MatrixXd>> c_x = list_to_vec<Eigen::Map<Eigen::MatrixXd>>(x);
-  std::vector<Eigen::Map<Eigen::MatrixXd>> c_masks = list_to_vec<Eigen::Map<Eigen::MatrixXd>>(x);
+  std::vector<Eigen::Map<Eigen::MatrixXd>> c_x =
+      list_to_vec<Eigen::Map<Eigen::MatrixXd>>(x);
+  std::vector<Eigen::Map<Eigen::MatrixXd>> c_masks =
+      list_to_vec<Eigen::Map<Eigen::MatrixXd>>(x);
 
   std::vector<std::size_t> cidx = compute_cidx(k, p);
 
-  return f_obj(theta.data(), c_x, c_masks, lambda, k, inds.array() - 1, p, x.size(), p.size(), cidx);
+  return f_obj(theta.data(), c_x, c_masks, lambda, k, inds.array() - 1, p, x.size(),
+               p.size(), cidx);
 }
 
 // [[Rcpp::export]]
@@ -207,16 +204,18 @@ Eigen::MatrixXd c_grad(Eigen::Map<Eigen::MatrixXd> theta, Rcpp::List x, Rcpp::Li
     }
   }
 
-  std::vector<Eigen::Map<Eigen::MatrixXd>> c_x = list_to_vec<Eigen::Map<Eigen::MatrixXd>>(x);
-  std::vector<Eigen::Map<Eigen::MatrixXd>> c_masks = list_to_vec<Eigen::Map<Eigen::MatrixXd>>(x);
+  std::vector<Eigen::Map<Eigen::MatrixXd>> c_x =
+      list_to_vec<Eigen::Map<Eigen::MatrixXd>>(x);
+  std::vector<Eigen::Map<Eigen::MatrixXd>> c_masks =
+      list_to_vec<Eigen::Map<Eigen::MatrixXd>>(x);
 
   const int indices_len = prep_indices_len(k, p);
   const Eigen::MatrixXi indices = prep_indices(indices_len, k, p);
   std::vector<std::size_t> cidx = compute_cidx(k, p);
 
   Eigen::MatrixXd grad(theta.rows(), theta.cols());
-  d_obj(grad.data(), theta.data(), c_x, c_masks, lambda, k, inds.array() - 1, p, x.size(), p.size(),
-        theta.size(), indices, num_threads, cidx);
+  d_obj(grad.data(), theta.data(), c_x, c_masks, lambda, k, inds.array() - 1, p, x.size(),
+        p.size(), theta.size(), indices, num_threads, cidx);
 
   return grad;
 }
@@ -241,15 +240,17 @@ Rcpp::List c_optim_mmpca(Eigen::Map<Eigen::MatrixXd> start, Rcpp::List x,
     }
   }
 
-  std::vector<Eigen::Map<Eigen::MatrixXd>> c_x = list_to_vec<Eigen::Map<Eigen::MatrixXd>>(x);
-  std::vector<Eigen::Map<Eigen::MatrixXd>> c_masks = list_to_vec<Eigen::Map<Eigen::MatrixXd>>(x);
+  std::vector<Eigen::Map<Eigen::MatrixXd>> c_x =
+      list_to_vec<Eigen::Map<Eigen::MatrixXd>>(x);
+  std::vector<Eigen::Map<Eigen::MatrixXd>> c_masks =
+      list_to_vec<Eigen::Map<Eigen::MatrixXd>>(x);
 
   Eigen::MatrixXd theta(start.rows(), start.cols());
   int iter, status;
   double upval, stepsize;
   char msg[100];
-  optim(theta.data(), start.data(), theta.size(), c_x, c_masks, inds.array() - 1, k, x.size(), p,
-        lambda, &iter, &status, msg, &upval, &stepsize, trace, num_threads);
+  optim(theta.data(), start.data(), theta.size(), c_x, c_masks, inds.array() - 1, k,
+        x.size(), p, lambda, &iter, &status, msg, &upval, &stepsize, trace, num_threads);
 
   Rcpp::List res(6);
   res[0] = theta;
