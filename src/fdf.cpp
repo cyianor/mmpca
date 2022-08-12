@@ -280,7 +280,7 @@ void inv_v(double* xi, double* t, int n) {
       }
       memcpy(t, tnew, sizeof(double) * n * n);
     }
-    R_CheckUserInterrupt();
+    Rcpp::checkUserInterrupt();
   }
 
   free(identity);

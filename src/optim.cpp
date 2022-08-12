@@ -4,11 +4,12 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multimin.h>
 
-#include <time.h>
+#include <ctime>
+#include <sstream>
 
 #include "fdf.h"
 
-double dx_nrm2(gsl_multimin_fdfminimizer* s) {
+static double dx_nrm2(gsl_multimin_fdfminimizer* s) {
   return gsl_blas_dnrm2(gsl_multimin_fdfminimizer_dx(s));
 }
 
@@ -28,14 +29,19 @@ void minimize(double* theta, int* iter, int* status, char* msg, double* stepsize
     if (trace && *iter % 10 == 0) {
       time_t t;
       time(&t);
-      Rprintf("%.19s\t%d\t%f\t%f\t%f\r", ctime(&t), *iter, s->f, dx_nrm2(s),
-              gsl_blas_dnrm2(s->gradient));
-      R_FlushConsole();
-      if (*iter % 1000 == 0) Rprintf("\n");
+
+      std::stringstream ss;
+      ss << std::setw(19) << std::string(ctime(&t)).substr(0, 19) << "\t"
+         << *iter << "\t"
+         << std::setprecision(6) << std::fixed << s->f << "\t"
+         << std::setprecision(6) << std::fixed << dx_nrm2(s) << "\t"
+         << std::setprecision(6) << std::fixed << gsl_blas_dnrm2(s->gradient) << "\r";
+      Rcpp::Rcout << ss.str();
+      if (*iter % 1000 == 0) Rcpp::Rcout << std::endl;
     }
     if (status_iter) break;
 
-    R_CheckUserInterrupt();
+    Rcpp::checkUserInterrupt();
   }
   *stepsize = dx_nrm2(s);
 
@@ -50,11 +56,16 @@ void minimize(double* theta, int* iter, int* status, char* msg, double* stepsize
   if (trace && *iter % 10 != 0) {
     time_t t;
     time(&t);
-    Rprintf("%.19s\t%d\t%f\t%f\t%f\n", ctime(&t), *iter, s->f, dx_nrm2(s),
-            gsl_blas_dnrm2(s->gradient));
-    R_FlushConsole();
+
+    std::stringstream ss;
+    ss << std::setw(19) << std::string(ctime(&t)).substr(0, 19) << "\t"
+       << *iter << "\t"
+       << std::setprecision(6) << std::fixed << s->f << "\t"
+       << std::setprecision(6) << std::fixed << dx_nrm2(s) << "\t"
+       << std::setprecision(6) << std::fixed << gsl_blas_dnrm2(s->gradient) << std::endl;
+    Rcpp::Rcout << ss.str();
   }
-  if (trace && *iter % 10 == 0 && *iter % 1000 >= 10) Rprintf("\n");
+  if (trace && *iter % 10 == 0 && *iter % 1000 >= 10) Rcpp::Rcout << std::endl;
 
   gsl_vector_memcpy(&gsl_opt.vector, s->x);
 
@@ -155,8 +166,11 @@ void optim(double* theta, const double* start, size_t len,
   if (trace) {
     time_t t;
     time(&t);
-    Rprintf("%.19s\tUnpenalized loss:\t%f\n", ctime(&t), *upval);
-    R_FlushConsole();
+    std::stringstream ss;
+    ss << std::setw(19) << std::string(ctime(&t)).substr(0, 19) << "\t"
+       << "Unpenalized loss:\t"
+       << std::setprecision(6) << std::fixed << *upval << std::endl;
+    Rcpp::Rcout << ss.str();
   }
 }
 
