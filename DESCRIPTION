@@ -1,6 +1,6 @@
 Package: mmpca
 Title: Integrative Analysis of Several Related Data Matrices
-Version: 2.0.1.99
+Version: 2.0.2
 Authors@R: c(
   person(given = "Jonatan", family = "Kallus", role = c("aut")),
   person(given = "Felix", family = "Held", email = "felix.held@gmail.com",
@@ -14,7 +14,7 @@ Description: A generalization of principal component analysis for integrative
 Depends: R (>= 3.3.0)
 Imports: digest (>= 0.6.0), Rcpp (>= 1.0.8)
 LinkingTo: Rcpp, RcppEigen, RcppGSL
-SystemRequirement: C++11
+SystemRequirements: C++11
 NeedsCompilation: yes
 License: GPL (>= 3)
 Encoding: UTF-8
