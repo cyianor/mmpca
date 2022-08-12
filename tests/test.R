@@ -1,6 +1,5 @@
 test_lambda_selection <- function() {
-  p <- rep(8, 5)
-  p[5] <- 2
+  p <- c(rep(8, 4), 2)
   inds <- matrix(c(1, 2, 3, 1, 4, 4, 4, 5), 4, 2)
   v <- list()
   for (i in 1:4) {
