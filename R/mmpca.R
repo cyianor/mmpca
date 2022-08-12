@@ -142,7 +142,7 @@ mmpca <- function(x, inds, k, lambda = NULL, trace = 0, init_theta = NULL,
       sum(test_masks[[i]] * (x[[i]] - U[[1]] %*% t(U[[2]]))^2)
     }))
     normalize <- function(M) {
-      for (i in 1:ncol(M)) {
+      for (i in seq_len(ncol(M))) {
         M[, i] <- M[, i] / sqrt(sum(M[, i]^2))
       }
       return(M)
@@ -190,65 +190,65 @@ mmpca <- function(x, inds, k, lambda = NULL, trace = 0, init_theta = NULL,
 
   result <- list()
   xiD <- ref_unvectorize(theta, k, max(inds), p)
-  result$initial <- list(xi=xiD$xi, D=xiD$D, theta=theta)
+  result$initial <- list(xi = xiD$xi, D = xiD$D, theta = theta)
   result$cmf <- cmf_result
 
   if (dim(lambda)[1] > 1) {
-  results <- list()
+    results <- list()
 
-  L <- function(lambda) {
-    if (trace > 1) {
-      msg("lambda: ", lambda, "\n")
+    L <- function(lambda) {
+      if (trace > 1) {
+        msg("lambda: ", lambda, "\n")
+      }
+      c_init_parallel()
+      res <- optim_mmpca_cached(theta, x, train_masks, inds, k, p, lambda,
+        lambda_factor, trace > 2, cachepath, 1)
+      # change small values to exact zeros in D
+      theta <- res[[1]]
+      ix <- (1+sum(p*k)):length(theta)
+      theta[ix][abs(theta[ix]) < 1e-5] <- 0
+      res[[1]] <- theta
+      loss <- c_objective(theta, x, test_masks, inds, k, p,
+        rep(0, length(lambda)))
+      if (trace > 0) {
+        msg("lambda: ", lambda, " -> test loss: ", loss, "\n")
+      }
+      return(list(value=loss,
+        extra=list(lambda=lambda, theta=theta, loss=loss, res=res)))
     }
-    c_init_parallel()
-    res <- optim_mmpca_cached(theta, x, train_masks, inds, k, p, lambda,
-      lambda_factor, trace > 2, cachepath, 1)
-    # change small values to exact zeros in D
-    theta <- res[[1]]
-    ix <- (1+sum(p*k)):length(theta)
-    theta[ix][abs(theta[ix]) < 1e-5] <- 0
-    res[[1]] <- theta
-    loss <- c_objective(theta, x, test_masks, inds, k, p,
-      rep(0, length(lambda)))
-    if (trace > 0) {
-      msg("lambda: ", lambda, " -> test loss: ", loss, "\n")
+
+    if (parallel) {
+      c_init_parallel()
+      tmp_res <- parallel::mclapply(1:nrow(lambda), function(i) L(lambda[i, ]),
+        mc.preschedule=FALSE)
+    } else {
+      tmp_res <- lapply(1:nrow(lambda), function(i) L(lambda[i, ]))
     }
-    return(list(value=loss,
-      extra=list(lambda=lambda, theta=theta, loss=loss, res=res)))
-  }
 
-  if (parallel) {
-    c_init_parallel()
-    tmp_res <- parallel::mclapply(1:nrow(lambda), function(i) L(lambda[i, ]),
-      mc.preschedule=FALSE)
-  } else {
-    tmp_res <- lapply(1:nrow(lambda), function(i) L(lambda[i, ]))
-  }
+    for (i in 1:length(tmp_res)) {
+      results[[i]] <- tmp_res[[i]]$extra
+    }
 
-  for (i in 1:length(tmp_res)) {
-    results[[i]] <- tmp_res[[i]]$extra
-  }
+    if (trace) msg("Postprocessing solutions... ")
+    solutions <- list()
+    losses <- rep(NA, length(results))
+    for (i in 1:length(results)) {
+      r <- results[[i]]
+      losses[i] <- r$loss
+      res <- r$res
 
-  if (trace) msg("Postprocessing solutions... ")
-  solutions <- list()
-  losses <- rep(NA, length(results))
-  for (i in 1:length(results)) {
-    r <- results[[i]]
-    losses[i] <- r$loss
-    res <- r$res
+      solutions[[i]] <- list(lambda=r$lambda, theta=r$theta,
+        iterations=res[[2]], status=res[[3]],
+        cv_error=r$loss, unpenalized_objective_value=res[[4]],
+        stepsize=res[[5]], message=res[[6]])
+    }
 
-    solutions[[i]] <- list(lambda=r$lambda, theta=r$theta,
-      iterations=res[[2]], status=res[[3]],
-      cv_error=r$loss, unpenalized_objective_value=res[[4]],
-      stepsize=res[[5]], message=res[[6]])
-  }
+    # order solutions from worst to best
+    result$training <- solutions[order(-losses)]
+    theta <- result$training[[length(result$training)]]$theta
+    lambda <- result$training[[length(result$training)]]$lambda
 
-  # order solutions from worst to best
-  result$training <- solutions[order(-losses)]
-  theta <- result$training[[length(result$training)]]$theta
-  lambda <- result$training[[length(result$training)]]$lambda
-
-  if (trace) msg("done\n")
+    if (trace) msg("done\n")
   }
 
   # calculate final solution using all data
@@ -259,7 +259,7 @@ mmpca <- function(x, inds, k, lambda = NULL, trace = 0, init_theta = NULL,
     ifelse(parallel, parallel::detectCores(), 1))
   # change small values to exact zeros in D
   theta <- res[[1]]
-  ix <- (1+sum(p*k)):length(theta)
+  ix <- (1 + sum(p * k)):length(theta)
   theta[ix][abs(theta[ix]) < 1e-5] <- 0
   res[[1]] <- theta
 
@@ -268,14 +268,17 @@ mmpca <- function(x, inds, k, lambda = NULL, trace = 0, init_theta = NULL,
   # rescale D
   xiD$D <- xiD$D / sqrt(data_scale_factor)
 
-  component_importances <- calculate_component_importances(xiD$D, inds,
-    lapply(x, function(x) x / data_scale_factor))
+  component_importances <- calculate_component_importances(
+    xiD$D, inds, lapply(x, function(x) x / data_scale_factor)
+  )
 
   # order components by total importance and calculate xhat
   ix <- order(-component_importances$total)
-  V <- lapply(xiD$xi, function(xi) c_Vxi(xi)[, ix, drop=FALSE])
+  V <- lapply(xiD$xi, function(xi) c_Vxi(xi)[, ix, drop = FALSE])
   # set exact zeros in V
-  for (i in 1:n) V[[i]][abs(V[[i]]) < 1e-5] <- 0
+  for (i in seq_len(n)) {
+    V[[i]][abs(V[[i]]) < 1e-5] <- 0
+  }
   xiD$D <- xiD$D[ix, ]
   component_importances$block <- component_importances$block[ix, ]
   component_importances$total <- component_importances$total[ix]
@@ -283,14 +286,25 @@ mmpca <- function(x, inds, k, lambda = NULL, trace = 0, init_theta = NULL,
   for (j in seq_along(x)) {
     row <- inds[j, 1]
     col <- inds[j, 2]
-    xhat[[j]] <- V[[row]] %*% diag(xiD$D[, row] * xiD$D[, col]) %*%
-      t(V[[col]])
+    xhat[[j]] <- (
+      V[[row]] %*% diag(xiD$D[, row] * xiD$D[, col]) %*% t(V[[col]])
+    )
   }
 
-  result$solution <- list(V=V, D=xiD$D, xhat=xhat, lambda=lambda,
-    R2_blockwise=component_importances$block,
-    R2_total=component_importances$total, test_masks=test_masks,
-    iterations=res[[2]], status=res[[3]], stepsize=res[[5]], message=res[[6]])
+  result$solution <- list(
+    V = V,
+    D = xiD$D,
+    xhat = xhat,
+    lambda = lambda,
+    R2_blockwise = component_importances$block,
+    R2_total = component_importances$total,
+    test_masks = test_masks,
+    iterations = res[[2]],
+    status = res[[3]],
+    stepsize = res[[5]],
+    message = res[[6]]
+  )
+
   if (trace) msg("done\n")
 
   return(result)
@@ -299,9 +313,9 @@ mmpca <- function(x, inds, k, lambda = NULL, trace = 0, init_theta = NULL,
 optim_mmpca_cached <- function(theta, x, masks, inds, k, p, lambda,
     lambda_factor, trace, path, nparallel) {
   hash <- digest::digest(list(x, masks, inds, k, p, lambda_factor))
-  lambda_str <- paste(lambda, collapse="_")
+  lambda_str <- paste(lambda, collapse = "_")
   if (!is.null(path)) {
-    filename <- file.path(path, paste(hash, lambda_str, sep=":"))
+    filename <- file.path(path, paste(hash, lambda_str, sep = ":"))
     if (file.exists(filename)) {
       return(readRDS(filename))
     }
@@ -309,9 +323,9 @@ optim_mmpca_cached <- function(theta, x, masks, inds, k, p, lambda,
   # make sparsity factor have same magnitude
   factor <- rep(1, length(lambda))
   if (length(lambda) > 2) {
-    factor[3] <- 1/length(p)
+    factor[3] <- 1 / length(p)
     if (length(lambda) > 3) {
-      factor[4] <- 1/length(p)
+      factor[4] <- 1 / length(p)
     }
   }
   res <- c_optim_mmpca(theta, x, masks, inds, k, p,
@@ -325,7 +339,7 @@ optim_mmpca_cached <- function(theta, x, masks, inds, k, p, lambda,
 cmf_cached <- function(data, views, K, trace, path, cmf_fun) {
   hash <- digest::digest(list(data, views, K))
   if (!is.null(path)) {
-    filename <- file.path(path, paste(hash, "cmf", sep=":"))
+    filename <- file.path(path, paste(hash, "cmf", sep = ":"))
     if (file.exists(filename)) {
       return(readRDS(filename))
     }
@@ -341,7 +355,7 @@ cmf_cached <- function(data, views, K, trace, path, cmf_fun) {
 init_inv_v_cached <- function(v, path) {
   hash <- digest::digest(v)
   if (!is.null(path)) {
-    filename <- file.path(path, paste(hash, "init_inv_v", sep=":"))
+    filename <- file.path(path, paste(hash, "init_inv_v", sep = ":"))
     if (file.exists(filename)) {
       return(readRDS(filename))
     }
@@ -356,18 +370,18 @@ init_inv_v_cached <- function(v, path) {
 
 cmf <- function(data, views, K, trace, cmf_fun) {
   D <- rep(NA, max(views))
-  for (i in 1:nrow(views)) {
+  for (i in seq_len(nrow(views))) {
     D[views[i, 1]] <- nrow(data[[i]])
     D[views[i, 2]] <- ncol(data[[i]])
   }
   data <- lapply(data, cmf_fun[[2]])
   opts <- cmf_fun[[3]]()
   opts$verbose <- trace - 1
-  cmf_fun[[1]](data, views, K, rep("gaussian", length(data)), D, opts=opts)
+  cmf_fun[[1]](data, views, K, rep("gaussian", length(data)), D, opts = opts)
 }
 
-mmpca_lambda1 <- function(x, inds, k, lambda, nparallel, init=FALSE,
-    trace=FALSE) {
+mmpca_lambda1 <- function(x, inds, k, lambda, nparallel, init = FALSE,
+    trace = FALSE) {
   result <- list()
   p <- init_view_dimensions(x, inds)
 
@@ -389,7 +403,7 @@ mmpca_lambda1 <- function(x, inds, k, lambda, nparallel, init=FALSE,
   xiD <- ref_unvectorize(theta, k, max(inds), p)
   solutions <- list()
   result$initial <- list(xi=xiD$xi, D=xiD$D, theta=theta)
-  for (i in 1:length(lambda)) {
+  for (i in seq_along(lambda)) {
     if (trace) {
       msg("lambda: ", lambda[i], "\n")
     }
@@ -403,7 +417,7 @@ mmpca_lambda1 <- function(x, inds, k, lambda, nparallel, init=FALSE,
 
     if (i == 1) { # reorder components according to importances
       ix <- order(component_importances$total, decreasing=TRUE)
-      for (j in 1:length(xiD$xi)) {
+      for (j in seq_along(xiD$xi)) {
         V <- c_Vxi(xiD$xi[[j]])
         xiD$xi[[j]] <- init_inv_v(V[, ix])
       }
@@ -473,5 +487,5 @@ validate_inds <- function(x, inds) {
 }
 
 msg <- function(...) {
-  message(..., appendLF=F)
+  message(..., appendLF = FALSE)
 }
