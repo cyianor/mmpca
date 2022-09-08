@@ -14,10 +14,12 @@ test_lambda_selection <- function() {
   X[[3]] <- v[[3]][, 1:2] %*% t(v[[4]][, 3:4])
   X[[4]] <- v[[1]][, c(1, 3)] %*% t(v[[5]][, 1:2])
   X[[1]][matrix(runif(8 * 8), 8, 8) < 0.2] <- NA
-  mmpca::mmpca(X, inds, 3, parallel = FALSE, trace = 3)
+  mmpca::mmpca(X, inds, 3, parallel = TRUE)
   # only checking for errors, not checking the result
   return(TRUE)
 }
-options(mc.cores = 2)
+opt <- options(mc.cores = 2)
 set.seed(1)
 test_lambda_selection()
+# Reset options
+options(opt)
