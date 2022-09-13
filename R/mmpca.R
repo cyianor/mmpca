@@ -63,7 +63,7 @@ mmpca <- function(x, inds, k, lambda = NULL, trace = 0, init_theta = NULL,
     enable_variable_selection = FALSE, parallel = TRUE) {
 
   if (enable_variable_selection && !enable_sparsity) {
-    stop("Variable selection can not be enabled when sparisty is not enabled.")
+    stop("Variable selection can not be enabled when sparsity is not enabled.")
   }
 
   nparam <- 2 + enable_sparsity + enable_variable_selection
@@ -97,30 +97,43 @@ mmpca <- function(x, inds, k, lambda = NULL, trace = 0, init_theta = NULL,
 
   # missing values, training set and test set
   missing_masks <- lapply(x, function(x) !is.na(x))
-  for (i in seq_along(x)) x[[i]][is.na(x[[i]])] <- 0
-  train_masks <- lapply(x,
-    function(x) 0.9 > matrix(stats::runif(prod(dim(x))), nrow(x), ncol(x)))
+  for (i in seq_along(x)) {
+    x[[i]][is.na(x[[i]])] <- 0
+  }
+  train_masks <- lapply(x, function(x) {
+    0.9 > matrix(stats::runif(prod(dim(x))), nrow(x), ncol(x))
+  })
   test_masks <- lapply(train_masks, function(x) !x)
-  train_masks <- lapply(seq_along(x),
-    function(i) 1 * (train_masks[[i]] & missing_masks[[i]]))
-  test_masks <- lapply(seq_along(x),
-    function(i) 1 * (test_masks[[i]] & missing_masks[[i]]))
+  train_masks <- lapply(seq_along(x), function(i) {
+    1 * (train_masks[[i]] & missing_masks[[i]])
+  })
+  test_masks <- lapply(seq_along(x), function(i) {
+    1 * (test_masks[[i]] & missing_masks[[i]])
+  })
   missing_masks <- lapply(seq_along(x), function(i) 1 * missing_masks[[i]])
 
   # rescale data so that biggest sing val is pi^2
   # factor is used to scale found D before returning
+
+  # NOTE: This is done after filling missing values with zeros
   max_sing_val <- max(sapply(x, function(x) svd(x)$d[1]))
   data_scale_factor <- pi^2 / max_sing_val
   x <- lapply(x, function(x) x * data_scale_factor)
 
   # find scaling factor for lambda
-  lambda_factor <- mean(sapply(seq_along(x),
-    function(i) sqrt(sum((x[[i]] * train_masks[[i]])^2))))^(3 / 2)
+  lambda_factor <- mean(sapply(seq_along(x), function(i) {
+    sqrt(sum((x[[i]] * train_masks[[i]])^2))
+  }))^(3 / 2)
 
   # find initial values
   cmf_result <- NULL
-  if (length(theta) == 3 && is.function(theta[[1]]) && is.function(theta[[2]])
-      && is.function(theta[[3]])) { # find initial values xi and D with CMF
+  if (
+    length(theta) == 3
+    && is.function(theta[[1]])
+    && is.function(theta[[2]])
+    && is.function(theta[[3]])
+  ) {
+    # find initial values xi and D with CMF
     cmf_fun <- theta
     if (trace) msg("Finding initial values... ")
     if (trace > 1) msg("\n")
