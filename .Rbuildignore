@@ -4,3 +4,4 @@
 ^math$
 ^Dockerfile$
 ^docker-compose.yml$
+^package$
