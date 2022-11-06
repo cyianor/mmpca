@@ -10,6 +10,7 @@ mmpca(
   k,
   lambda = NULL,
   trace = 0,
+  max_iter = 20000,
   init_theta = NULL,
   cachepath = NULL,
   enable_rank_selection = TRUE,
@@ -36,6 +37,8 @@ matrix where each column is the sequence \code{exp(seq(-6, 0)))}.}
 
 \item{trace}{Integer selecting the amount of log messages. 0 (default): no
 output, 3: all output.}
+
+\item{max_iter}{Maximum number of iterations}
 
 \item{init_theta}{NULL, functions or numeric. NULL (default) use initial
 values based on ordinary SVD. If init_theta is a list of three functions

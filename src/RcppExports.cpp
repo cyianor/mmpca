@@ -13,37 +13,37 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // c_objective
-double c_objective(Eigen::Map<Eigen::MatrixXd> theta, Rcpp::List x, Rcpp::List masks, Eigen::MatrixXi inds, int k, Eigen::VectorXi p, Eigen::VectorXd lambda);
-RcppExport SEXP _mmpca_c_objective(SEXP thetaSEXP, SEXP xSEXP, SEXP masksSEXP, SEXP indsSEXP, SEXP kSEXP, SEXP pSEXP, SEXP lambdaSEXP) {
+double c_objective(Eigen::Map<Eigen::MatrixXd> theta, Rcpp::List x_list, Rcpp::List masks_list, Eigen::MatrixXi inds, int k, Eigen::VectorXi p, Eigen::VectorXd lambda);
+RcppExport SEXP _mmpca_c_objective(SEXP thetaSEXP, SEXP x_listSEXP, SEXP masks_listSEXP, SEXP indsSEXP, SEXP kSEXP, SEXP pSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type masks(masksSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type x_list(x_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type masks_list(masks_listSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXi >::type inds(indsSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXi >::type p(pSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(c_objective(theta, x, masks, inds, k, p, lambda));
+    rcpp_result_gen = Rcpp::wrap(c_objective(theta, x_list, masks_list, inds, k, p, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
 // c_grad
-Eigen::MatrixXd c_grad(Eigen::Map<Eigen::MatrixXd> theta, Rcpp::List x, Rcpp::List masks, Eigen::MatrixXi inds, int k, Eigen::VectorXi p, Eigen::VectorXd lambda, int num_threads);
-RcppExport SEXP _mmpca_c_grad(SEXP thetaSEXP, SEXP xSEXP, SEXP masksSEXP, SEXP indsSEXP, SEXP kSEXP, SEXP pSEXP, SEXP lambdaSEXP, SEXP num_threadsSEXP) {
+Eigen::MatrixXd c_grad(Eigen::Map<Eigen::MatrixXd> theta, Rcpp::List x_list, Rcpp::List masks_list, Eigen::MatrixXi inds, int k, Eigen::VectorXi p, Eigen::VectorXd lambda, int n_threads);
+RcppExport SEXP _mmpca_c_grad(SEXP thetaSEXP, SEXP x_listSEXP, SEXP masks_listSEXP, SEXP indsSEXP, SEXP kSEXP, SEXP pSEXP, SEXP lambdaSEXP, SEXP n_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type masks(masksSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type x_list(x_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type masks_list(masks_listSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXi >::type inds(indsSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXi >::type p(pSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(c_grad(theta, x, masks, inds, k, p, lambda, num_threads));
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(c_grad(theta, x_list, masks_list, inds, k, p, lambda, n_threads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -59,21 +59,22 @@ BEGIN_RCPP
 END_RCPP
 }
 // c_optim_mmpca
-Rcpp::List c_optim_mmpca(Eigen::Map<Eigen::MatrixXd> start, Rcpp::List x, Rcpp::List masks, Eigen::MatrixXi inds, int k, Eigen::VectorXi p, Eigen::VectorXd lambda, bool trace, int num_threads);
-RcppExport SEXP _mmpca_c_optim_mmpca(SEXP startSEXP, SEXP xSEXP, SEXP masksSEXP, SEXP indsSEXP, SEXP kSEXP, SEXP pSEXP, SEXP lambdaSEXP, SEXP traceSEXP, SEXP num_threadsSEXP) {
+Rcpp::List c_optim_mmpca(Eigen::Map<Eigen::MatrixXd> start, Rcpp::List x_list, Rcpp::List masks_list, Eigen::MatrixXi inds, int k, Eigen::VectorXi p, Eigen::VectorXd lambda, int max_iter, bool trace, int n_threads);
+RcppExport SEXP _mmpca_c_optim_mmpca(SEXP startSEXP, SEXP x_listSEXP, SEXP masks_listSEXP, SEXP indsSEXP, SEXP kSEXP, SEXP pSEXP, SEXP lambdaSEXP, SEXP max_iterSEXP, SEXP traceSEXP, SEXP n_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type start(startSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Rcpp::List >::type masks(masksSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type x_list(x_listSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type masks_list(masks_listSEXP);
     Rcpp::traits::input_parameter< Eigen::MatrixXi >::type inds(indsSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXi >::type p(pSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< bool >::type trace(traceSEXP);
-    Rcpp::traits::input_parameter< int >::type num_threads(num_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(c_optim_mmpca(start, x, masks, inds, k, p, lambda, trace, num_threads));
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(c_optim_mmpca(start, x_list, masks_list, inds, k, p, lambda, max_iter, trace, n_threads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -102,7 +103,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mmpca_c_objective", (DL_FUNC) &_mmpca_c_objective, 7},
     {"_mmpca_c_grad", (DL_FUNC) &_mmpca_c_grad, 8},
     {"_mmpca_c_Vxi", (DL_FUNC) &_mmpca_c_Vxi, 1},
-    {"_mmpca_c_optim_mmpca", (DL_FUNC) &_mmpca_c_optim_mmpca, 9},
+    {"_mmpca_c_optim_mmpca", (DL_FUNC) &_mmpca_c_optim_mmpca, 10},
     {"_mmpca_c_invVinner", (DL_FUNC) &_mmpca_c_invVinner, 1},
     {"_mmpca_c_init_parallel", (DL_FUNC) &_mmpca_c_init_parallel, 0},
     {NULL, NULL, 0}

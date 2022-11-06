@@ -1,6 +1,6 @@
 Package: mmpca
 Title: Integrative Analysis of Several Related Data Matrices
-Version: 2.0.2
+Version: 2.0.3
 Authors@R: c(
   person(given = "Jonatan", family = "Kallus", role = c("aut")),
   person(given = "Felix", family = "Held", email = "felix.held@gmail.com",
@@ -11,9 +11,14 @@ Description: A generalization of principal component analysis for integrative
   solutions is automatically selected using cross validation. The method is
   described in Kallus et al. (2019) <arXiv:1911.04927>.
 Depends: R (>= 3.3.0)
-Imports: digest (>= 0.6.0), Rcpp (>= 1.0.8)
-LinkingTo: Rcpp, RcppEigen, RcppGSL
-SystemRequirements: C++11
+Imports:
+  digest (>= 0.6.0),
+  Rcpp (>= 1.0.8)
+LinkingTo:
+  Rcpp,
+  RcppEigen,
+  RcppGSL
+SystemRequirements: C++14
 Biarch: true
 NeedsCompilation: yes
 License: GPL (>= 3)
