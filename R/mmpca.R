@@ -420,7 +420,7 @@ cmf <- function(data, views, K, trace, cmf_fun) {
 }
 
 mmpca_lambda1 <- function(x, inds, k, lambda, nparallel, init = FALSE,
-    trace = FALSE) {
+    max_iter = 20000, trace = FALSE) {
   result <- list()
   p <- init_view_dimensions(x, inds)
 
