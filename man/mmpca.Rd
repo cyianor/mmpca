@@ -78,9 +78,11 @@ matrix_to_triplets, getCMFopts))}
 Analyzes several related matrices of data.
 }
 \examples{
+\dontrun{
 x <- list(matrix(rnorm(110), 10, 11), matrix(rnorm(120), 10, 12))
 inds <- matrix(c(1, 1, 2, 3), 2, 2)
-result <- mmpca(x, inds, 3, parallel=FALSE)
+result <- mmpca(x, inds, 3, parallel = FALSE)
+}
 
 }
 \author{
