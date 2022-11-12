@@ -60,7 +60,7 @@ imposes a low rank model should be enabled.}
 sparsity in V should be enabled.}
 
 \item{enable_variable_selection}{Boolean deciding if the fourth penalty that
-increases the tendence for sparsity structure of different V columns to be
+increases the tendency for sparsity structure of different V columns to be
 similar. Defaults to FALSE meaning this penalty is not used.}
 
 \item{parallel}{Boolean deciding if computations should be run on multiple
@@ -78,11 +78,29 @@ matrix_to_triplets, getCMFopts))}
 Analyzes several related matrices of data.
 }
 \examples{
-\dontrun{
-x <- list(matrix(rnorm(110), 10, 11), matrix(rnorm(120), 10, 12))
+# Create model with three views, two data matrices of low-rank 3
+max_rank <- 3
+v <- list(
+  qr.Q(qr(matrix(rnorm(10 * max_rank), 10, max_rank))),
+  qr.Q(qr(matrix(rnorm(11 * max_rank), 11, max_rank))),
+  qr.Q(qr(matrix(rnorm(12 * max_rank), 12, max_rank)))
+)
+d <- matrix(
+  c(1, 1, 1, 1, 1, 0, 1, 0, 1),
+  nrow = max_rank, ncol = 3
+)
+x <- list(
+  v[[1]] \%*\% diag(d[, 1] * d[, 2]) \%*\% t(v[[2]]),
+  v[[1]] \%*\% diag(d[, 1] * d[, 3]) \%*\% t(v[[3]])
+)
 inds <- matrix(c(1, 1, 2, 3), 2, 2)
-result <- mmpca(x, inds, 3, parallel = FALSE)
-}
+result <- mmpca::mmpca(
+  x, inds, max_rank, parallel = FALSE,
+  lambda = c(1e-3, 1e-5), enable_sparsity = FALSE,
+  trace = 3
+)
+# Investigate the solution
+result$solution$D
 
 }
 \author{

@@ -19,7 +19,7 @@ test_lambda_selection <- function() {
     X,
     inds,
     3,
-    parallel = FALSE,
+    parallel = TRUE,
     lambda = c(0.1, 0.1, 0.1),
     max_iter = 20
   )

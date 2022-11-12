@@ -38,7 +38,7 @@
 #' @param enable_sparsity Boolean deciding if the third penalty that imposes
 #'   sparsity in V should be enabled.
 #' @param enable_variable_selection Boolean deciding if the fourth penalty that
-#'   increases the tendence for sparsity structure of different V columns to be
+#'   increases the tendency for sparsity structure of different V columns to be
 #'   similar. Defaults to FALSE meaning this penalty is not used.
 #' @param parallel Boolean deciding if computations should be run on multiple
 #'   cores simultaneously.
@@ -51,11 +51,29 @@
 #'   \item{solution}{solution for optimal lambda value}
 #'
 #' @examples
-#' \dontrun{
-#' x <- list(matrix(rnorm(110), 10, 11), matrix(rnorm(120), 10, 12))
+#' # Create model with three views, two data matrices of low-rank 3
+#' max_rank <- 3
+#' v <- list(
+#'   qr.Q(qr(matrix(rnorm(10 * max_rank), 10, max_rank))),
+#'   qr.Q(qr(matrix(rnorm(11 * max_rank), 11, max_rank))),
+#'   qr.Q(qr(matrix(rnorm(12 * max_rank), 12, max_rank)))
+#' )
+#' d <- matrix(
+#'   c(1, 1, 1, 1, 1, 0, 1, 0, 1),
+#'   nrow = max_rank, ncol = 3
+#' )
+#' x <- list(
+#'   v[[1]] %*% diag(d[, 1] * d[, 2]) %*% t(v[[2]]),
+#'   v[[1]] %*% diag(d[, 1] * d[, 3]) %*% t(v[[3]])
+#' )
 #' inds <- matrix(c(1, 1, 2, 3), 2, 2)
-#' result <- mmpca(x, inds, 3, parallel = FALSE)
-#' }
+#' result <- mmpca::mmpca(
+#'   x, inds, max_rank, parallel = FALSE,
+#'   lambda = c(1e-3, 1e-5), enable_sparsity = FALSE,
+#'   trace = 3
+#' )
+#' # Investigate the solution
+#' result$solution$D
 #'
 #' @author Jonatan Kallus, \email{kallus@@chalmers.se}
 #' @keywords pca models multivariate
@@ -224,7 +242,7 @@ mmpca <- function(x, inds, k, lambda = NULL, trace = 0, max_iter = 20000,
         lambda_factor, max_iter, trace > 2, cachepath, 1)
       # change small values to exact zeros in D
       theta <- res[[1]]
-      ix <- (1+sum(p*k)):length(theta)
+      ix <- (1 + sum(p * k)):length(theta)
       theta[ix][abs(theta[ix]) < 1e-5] <- 0
       res[[1]] <- theta
       loss <- c_objective(theta, x, test_masks, inds, k, p,

@@ -88,7 +88,7 @@ static std::vector<std::size_t> compute_cidx(const int k, const Eigen::VectorXi&
   std::vector<std::size_t> cidx(p.size() + 1);
   cidx[0] = 0;
   for (size_t i = 1, n = cidx.size(); i < n; i++) {
-    cidx[i] += k * p[i - 1];
+    cidx[i] = k * p[i - 1] + cidx[i - 1];
   }
 
   return cidx;
@@ -109,7 +109,7 @@ double c_objective(Eigen::Map<Eigen::MatrixXd> theta, Rcpp::List x_list,
                    Eigen::VectorXd lambda) {
   if (lambda.size() < 4) {
     const auto i = lambda.size();
-    lambda.resize(4);
+    lambda.conservativeResize(4);
     for (auto j = i; j < 4; j++) {
       lambda[j] = 0.0;
     }
@@ -132,7 +132,7 @@ Eigen::MatrixXd c_grad(Eigen::Map<Eigen::MatrixXd> theta, Rcpp::List x_list,
                        Eigen::VectorXi p, Eigen::VectorXd lambda, int n_threads) {
   if (lambda.size() < 4) {
     const auto i = lambda.size();
-    lambda.resize(4);
+    lambda.conservativeResize(4);
     for (auto j = i; j < 4; j++) {
       lambda[j] = 0.0;
     }
@@ -167,7 +167,7 @@ Rcpp::List c_optim_mmpca(Eigen::Map<Eigen::MatrixXd> start, Rcpp::List x_list,
                          bool trace, int n_threads) {
   if (lambda.size() < 4) {
     const auto i = lambda.size();
-    lambda.resize(4);
+    lambda.conservativeResize(4);
     for (auto j = i; j < 4; j++) {
       lambda[j] = 0.0;
     }
