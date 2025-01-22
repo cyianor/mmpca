@@ -1,8 +1,8 @@
-#include <RcppEigen.h>
+#include <Eigen/Core>
+#include <Rcpp/Lightest>
 #include <gsl/gsl_sf_trig.h>
 
-#include <iostream>
-using namespace std;
+#include <vector>
 
 using pvt = Eigen::Array<Eigen::Array<Eigen::MatrixXd, Eigen::Dynamic, Eigen::Dynamic>,
                          Eigen::Dynamic, 1>;

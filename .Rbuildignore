@@ -1,7 +1,5 @@
 ^\.clang-format$
 ^LICENSE\.md$
-^.vscode$
-^math$
-^Dockerfile$
-^docker-compose.yml$
+^.cache$
+^compile_commands.json$
 ^package$

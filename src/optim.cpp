@@ -1,4 +1,5 @@
 #include <RcppEigen.h>
+#include <Rcpp/Lightest>
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_matrix.h>

@@ -1,6 +1,6 @@
 .vscode
-config.log
-config.status
 *.tar.gz
 *.Rcheck
 .DS_Store
+compile_commands.json
+.cache

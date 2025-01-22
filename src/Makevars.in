@@ -7,4 +7,7 @@ GSL_LIBS = @GSL_LIBS@
 PKG_CXXFLAGS = $(GSL_CFLAGS) -I. $(SHLIB_OPENMP_CXXFLAGS)
 PKG_LIBS = $(GSL_LIBS) $(SHLIB_OPENMP_CXXFLAGS)
 
-CXX_STD = CXX14
+# # Uncomment to generate compilation databases (e.g. for clangd)
+# # Combine the content of the individual generated json files in a
+# # list and save in compile_commands.json
+# PKG_CPPFLAGS += -MJ "$@.json"
