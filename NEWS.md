@@ -1,3 +1,7 @@
+# mmpca 2.0.4 (2025-12-10)
+
+* Addressed minor CRAN comments
+
 # mmpca 2.0.3 (2022-11-06)
 
 * Addressed memory issues that Valgrind pointed out in the last release
