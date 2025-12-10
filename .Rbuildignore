@@ -1,5 +1,5 @@
 ^\.clang-format$
 ^LICENSE\.md$
-^.cache$
+.cache$
 ^compile_commands.json$
 ^package$
