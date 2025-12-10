@@ -3,3 +3,5 @@
 .cache$
 ^compile_commands.json$
 ^package$
+^CRAN-SUBMISSION$
+^cran-comments.md$
