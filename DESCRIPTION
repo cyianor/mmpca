@@ -1,6 +1,6 @@
 Package: mmpca
 Title: Integrative Analysis of Several Related Data Matrices
-Version: 2.0.3
+Version: 2.0.4
 Authors@R: c(
   person(given = "Jonatan", family = "Kallus", role = c("aut")),
   person(given = "Felix", family = "Held", email = "felix.held@gmail.com",
@@ -9,7 +9,7 @@ Description: A generalization of principal component analysis for integrative
   analysis. The method finds principal components that describe single matrices
   or that are common to several matrices. The solutions are sparse. Rank of
   solutions is automatically selected using cross validation. The method is
-  described in Kallus et al. (2019) <arXiv:1911.04927>.
+  described in Kallus et al. (2019) <doi:10.48550/arXiv.1911.04927>.
 Depends: R (>= 3.3.0)
 Imports:
   digest (>= 0.6.0),
@@ -22,7 +22,7 @@ NeedsCompilation: yes
 License: GPL (>= 3)
 Encoding: UTF-8
 Language: en-US
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/cyianor/mmpca
 BugReports: https://github.com/cyianor/mmpca/issues
